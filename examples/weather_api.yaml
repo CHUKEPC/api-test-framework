@@ -1,0 +1,42 @@
+# REST API Test Suite: Schema and Complex Assertions
+name: "JSON Schema and Pattern Verification"
+description: "Demonstrates JSON Schema validation, regex, and status code lists"
+base_url: "https://httpbin.org"
+
+variables:
+  city_name: "Berlin"
+
+tests:
+  - name: "Query echo with JSON schema assertion"
+    description: "Validate structure of query echo response against a JSON schema"
+    request:
+      method: "GET"
+      url: "/get"
+      query_params:
+        city: "{{ city_name }}"
+        units: "metric"
+    assertions:
+      status_code: [200, 201]
+      schema:
+        type: "object"
+        required: ["args", "headers", "url"]
+        properties:
+          args:
+            type: "object"
+            required: ["city", "units"]
+            properties:
+              city:
+                type: "string"
+              units:
+                type: "string"
+          url:
+            type: "string"
+      jsonpath:
+        - path: "$.args.city"
+          op: "equals"
+          expected: "{{ city_name }}"
+        - path: "$.args.units"
+          op: "equals"
+          expected: "metric"
+      body_regex: "https?://.*"
+      max_duration: 3.0

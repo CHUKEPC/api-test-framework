@@ -1,0 +1,66 @@
+# REST API Test Suite: Auth & Secured Resources
+name: "Authentication Flow and Chaining Suite"
+description: "Demonstrates token authentication, header assertions, and chaining"
+base_url: "https://httpbin.org"
+
+headers:
+  Accept: "application/json"
+
+variables:
+  client_token: "secret-token-xyz-12345"
+
+tests:
+  - name: "Authenticate and verify Bearer token"
+    description: "Send request with Bearer authentication and assert received headers"
+    request:
+      method: "GET"
+      url: "/bearer"
+      auth:
+        type: "bearer"
+        token: "{{ client_token }}"
+    assertions:
+      status_code: 200
+      jsonpath:
+        - path: "$.authenticated"
+          op: "equals"
+          expected: true
+        - path: "$.token"
+          op: "equals"
+          expected: "{{ client_token }}"
+      max_duration: 3.5
+
+  - name: "Check API Key in custom header"
+    description: "Send API key in header and verify echo"
+    request:
+      method: "GET"
+      url: "/headers"
+      auth:
+        type: "api_key"
+        key_name: "X-Custom-API-Key"
+        key_value: "key-999"
+        location: "header"
+    assertions:
+      status_code: 200
+      jsonpath:
+        - path: "$.headers.X-Custom-Api-Key"
+          op: "equals"
+          expected: "key-999"
+
+  - name: "Basic Auth test"
+    description: "Verify HTTP Basic Auth flow"
+    request:
+      method: "GET"
+      url: "/basic-auth/admin/secretpass"
+      auth:
+        type: "basic"
+        username: "admin"
+        password: "secretpass"
+    assertions:
+      status_code: 200
+      jsonpath:
+        - path: "$.authenticated"
+          op: "equals"
+          expected: true
+        - path: "$.user"
+          op: "equals"
+          expected: "admin"

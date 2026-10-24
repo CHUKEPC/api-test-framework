@@ -1,0 +1,73 @@
+# REST API Test Suite: Users Resource
+name: "Users Resource API Tests"
+description: "Demonstrates request chaining, JSONPath assertions, and response time checks"
+base_url: "https://jsonplaceholder.typicode.com"
+
+headers:
+  Content-Type: "application/json"
+  Accept: "application/json"
+
+variables:
+  new_username: "qa_engineer"
+  new_email: "qa@example.com"
+
+tests:
+  - name: "List all users"
+    description: "Verify list endpoint returns users array"
+    request:
+      method: "GET"
+      url: "/users"
+      query_params:
+        _limit: 5
+    assertions:
+      status_code: 200
+      headers:
+        content-type:
+          op: "contains"
+          expected: "application/json"
+      jsonpath:
+        - path: "$[0].id"
+          op: "exists"
+        - path: "$[0].name"
+          op: "type"
+          expected: "str"
+      max_duration: 3.0
+
+  - name: "Create new user"
+    description: "Submit POST request to create user and capture ID"
+    request:
+      method: "POST"
+      url: "/users"
+      json:
+        name: "Test User"
+        username: "{{ new_username }}"
+        email: "{{ new_email }}"
+    assertions:
+      status_code: 201
+      jsonpath:
+        - path: "$.id"
+          op: "exists"
+        - path: "$.username"
+          op: "equals"
+          expected: "{{ new_username }}"
+      max_duration: 3.0
+    extract:
+      - name: "created_user_id"
+        source: "jsonpath"
+        expression: "$.id"
+
+  - name: "Retrieve specific user by ID"
+    description: "Verify user details by ID"
+    request:
+      method: "GET"
+      url: "/users/1"
+    assertions:
+      status_code: 200
+      jsonpath:
+        - path: "$.id"
+          op: "equals"
+          expected: 1
+        - path: "$.email"
+          op: "contains"
+          expected: "@"
+      max_duration: 2.0

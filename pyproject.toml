@@ -1,0 +1,134 @@
+[project]
+name = "api-test-framework"
+version = "0.1.0"
+description = "REST API testing framework with YAML DSL, pytest plugin, JSONPath assertions, variable chaining, auth helpers, and rich reporting. PyPI-ready Python package"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    {name = "CHUKEPC"},
+]
+keywords = [
+    "testing",
+    "pytest",
+    "pytest-plugin",
+    "rest-api",
+    "yaml",
+    "dsl",
+    "jsonpath",
+    "jsonschema",
+    "httpx",
+    "pypi",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
+]
+dependencies = [
+    "httpx>=0.27.0",
+    "pyyaml>=6.0.1",
+    "pydantic>=2.7.0",
+    "jinja2>=3.1.3",
+    "jsonpath-ng>=1.6.1",
+    "jsonschema>=4.21.0",
+    "rich>=13.7.0",
+    "click>=8.1.7",
+    "pytest>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "pytest-asyncio>=0.23.0",
+    "mypy>=1.10.0",
+    "ruff>=0.5.0",
+    "types-pyyaml>=6.0.12",
+]
+
+[project.entry-points."pytest11"]
+api_test_framework = "api_test_framework.pytest_plugin"
+
+[project.scripts]
+api-test = "api_test_framework.main:cli"
+
+[project.urls]
+Homepage = "https://github.com/CHUKEPC/api-test-framework"
+Repository = "https://github.com/CHUKEPC/api-test-framework"
+Issues = "https://github.com/CHUKEPC/api-test-framework/issues"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+api_test_framework = ["py.typed"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 99
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "TCH",  # flake8-type-checking
+    "RUF",  # ruff-specific rules
+]
+ignore = ["E501", "TC001", "TC002", "TC003"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["api_test_framework"]
+
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["typing", "pathlib"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "jsonpath_ng.*",
+    "jsonschema.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short -p no:api_test_framework --cov=src --cov-report=term-missing"
+markers = [
+    "api_test: mark test as a declarative REST API test",
+    "smoke: smoke test marker",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
